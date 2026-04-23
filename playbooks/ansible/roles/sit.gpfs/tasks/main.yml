@@ -85,6 +85,9 @@
         - name: Enable SMB protocol
           command: "{{ gpfs_toolkit }} enable smb"
 
+        - name: Enable NFS protocol
+          command: "{{ gpfs_toolkit }} enable nfs"
+
         - name: Configure shared directory
           command: >-
             {{ gpfs_toolkit }} config protocols -f sit_fs -m /gpfs/sit_fs
@@ -108,8 +111,36 @@
         - name: Deploy protocols
           command: "{{ gpfs_toolkit }} deploy"
 
-        - name: Configure authentication
+        - name: Configure local authentication
+          when: config.groups['ad'] is not defined
           command: /usr/lpp/mmfs/bin/mmuserauth service create --data-access-method file --type userdefined
+
+          # If there's no authselect profile enabled, mmuserauth doesn't configure /etc/nsswitch.conf
+        - name: Configure default identity and authentication source
+          command: authselect select sssd --force
+
+        - name: Create password file
+          copy:
+            content: >
+              %fileauth:
+              password=Passw0rd
+            dest: /var/mmfs/ssl/keyServ/tmp/pwd
+            mode: 0600
+
+        - name: Configure AD authentication
+          when: config.groups['ad'] is defined
+          command: >-
+            /usr/lpp/mmfs/bin/mmuserauth service create
+              --data-access-method file
+              --type ad
+              --netbios-name ess
+              --user-name Administrator
+              --pwd-file pwd
+              --idmap-role master
+              --servers "{{ config.groups['ad'][0] }}.{{ config.domain }}"
+              --idmap-range-size 1000000
+              --idmap-range 10000000-299999999
+              --unixmap-domains "{{ config.domain.split('.')[0] | upper }}(5000-20000:unix)"
 
         - name: Create shares
           vars:
@@ -123,7 +154,6 @@
 
         - name: Configure shares
           command: >-
-            /usr/lpp/mmfs/bin/mmsmb export add
-              {{ item[0].name }}-{{ config.be.name }}-{{ config.be.variant }}-{{ item[1] }}
-              /gpfs/sit_fs/{{ item[0].name }}
+            /usr/lpp/mmfs/bin/mmnfs export add /gpfs/sit_fs/{{ item[0].name }}
+              -c "*(Access_Type=RW)"
           loop: "{{ samba_shares | product(config.be.methods) | list }}"

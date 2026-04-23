@@ -8,23 +8,6 @@
   loop_control:
     loop_var: include_file
 
-# Storage Scale documentation recommends disabling rpcbind in all non-protocol
-# nodes. Since we are not running NFS even in protocol nodes, we disable it
-# everywhere if present.
-- name: Collect existing services
-  service_facts:
-
-- name: Disable rpcbind
-  systemd:
-    name: "{{ item }}"
-    enabled: false
-    masked: true
-    state: stopped
-  loop:
-    - rpcbind.socket
-    - rpcbind
-  when: "'rpcbind.service' in ansible_facts.services"
-
 - name: Disable firewall
   service:
     name: firewalld

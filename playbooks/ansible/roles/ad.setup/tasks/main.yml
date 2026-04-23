@@ -1,0 +1,75 @@
+---
+- name: Process OS specific tasks
+  include_tasks: "{{ include_file }}"
+  vars:
+    prefix: "{{ role_path }}/tasks/"
+  with_first_found:
+    - files: "{{ [prefix] | product(config.os[site.os].includes) | map('join') | list }}"
+  loop_control:
+    loop_var: include_file
+
+- name: Selinux - Allow domain controller
+  seboolean:
+    name: samba_domain_controller
+    state: yes
+    persistent: yes
+
+- name: Check firewall
+  command: firewall-cmd --state
+  failed_when: false
+  register: fwd_state
+
+- name: Configure firewall
+  when: fwd_state.stdout == "running"
+  block:
+    - name: Enable firewall for samba
+      firewalld:
+        service: "{{ item }}"
+        permanent: yes
+        state: enabled
+      with_items:
+        - samba
+        - kerberos
+        - ldap
+
+    - name: Reload firewall
+      command: firewall-cmd --reload
+
+- name: Delete existing Samba and Kerberos configurations
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/krb5.conf
+    - /etc/samba/smb.conf
+
+- name: Create domain controller
+  command: >-
+    samba-tool domain provision
+      --realm={{ config.domain | upper }}
+      --domain={{ config.domain.split('.')[0] | upper }}
+      --host-ip={{ config.nodes[inventory_hostname].networks.public }}
+      --server-role=dc
+      --dns-backend=SAMBA_INTERNAL
+      --option="dns forwarder = {{ ansible_facts.dns.nameservers[0] }}"
+      --adminpass=Passw0rd
+      --use-rfc2307
+
+- name: Create kerberos configuration
+  copy:
+    remote_src: true
+    src: /var/lib/samba/private/krb5.conf
+    dest: /etc/krb5.conf
+
+- name: Start domain controller
+  systemd_service:
+    name: samba
+    enabled: true
+    state: started
+
+- name: Configura DNS
+  lineinfile:
+    path: /etc/resolv.conf
+    regex: "^nameserver"
+    line: "nameserver {{ config.nodes[inventory_hostname].networks.public }}"
+    state: present

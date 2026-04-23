@@ -7,6 +7,9 @@ endif
 setup.test:
 	@ansible-playbook -i $(INVENTORY) ${ANSIBLE_EXTRA_VARS} ./test.local.yml
 
+setup.ad:
+	@ansible-playbook -i $(INVENTORY) ${ANSIBLE_EXTRA_VARS} ./setup-ad.yml
+
 setup.cluster:
 	@ansible-playbook -i $(INVENTORY) ${ANSIBLE_EXTRA_VARS} ./setup-cluster.yml
 
@@ -19,6 +22,6 @@ generate.report:
 client.test:
 	@ansible-playbook -i $(INVENTORY) ${ANSIBLE_EXTRA_VARS} ./client-test.yml
 
-setup.site: setup.cluster setup.clients client.test
+setup.site: setup.ad setup.cluster setup.clients client.test
 
-.PHONY: setup.cluster setup.clients setup.site
+.PHONY: setup.ad setup.cluster setup.clients setup.site

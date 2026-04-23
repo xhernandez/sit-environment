@@ -1,0 +1,14 @@
+---
+- name: Add EPEL repository
+  yum:
+    name: epel-release
+    state: present
+
+- name: Install samba DC
+  yum:
+    name:
+      - samba-dc
+      - krb5-workstation
+      - bind-utils
+      - python3-libsemanage
+    state: present

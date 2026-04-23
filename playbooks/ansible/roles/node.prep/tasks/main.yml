@@ -10,3 +10,11 @@
   include_role:
     name: 'sit.{{ config.be.name }}'
     tasks_from: server/main.yml
+
+- name: Configura DNS for AD
+  when: config.groups['ad'] is defined
+  lineinfile:
+    path: /etc/resolv.conf
+    regex: "^nameserver"
+    line: "nameserver {{ config.nodes[config.groups['ad'][0]].networks.public }}"
+    state: present

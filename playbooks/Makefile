@@ -23,10 +23,13 @@ setup.prep.copy:
 setup.test.only:
 	@ansible-playbook --inventory=$(INVENTORY) ${ANSIBLE_EXTRA_VARS} setup.test.yml
 
+setup.ad.only:
+	@$(VSSH) admin "${SSH_EXTRA_VARS} make -C ansible setup.ad"
+
 setup.cluster.only:
 	@$(VSSH) admin "${SSH_EXTRA_VARS} make -C ansible setup.cluster"
 
-setup.cluster: setup.prep setup.test.only setup.cluster.only
+setup.cluster: setup.prep setup.test.only setup.ad.only setup.cluster.only
 
 setup.clients:
 	@$(VSSH) admin "${SSH_EXTRA_VARS} make -C ansible setup.clients"
@@ -48,4 +51,4 @@ client1.test:
 clean:
 	@ansible-playbook --inventory localhost, ${ANSIBLE_EXTRA_VARS} cleanup.yml
 
-.PHONY: local hosts.update.only setup.prep.only setup.prep setup.test.only setup.cluster.only setup.cluster setup.clients client.test setup.site client1.test clean
+.PHONY: local hosts.update.only setup.prep.only setup.prep setup.test.only setup.ad.only setup.cluster.only setup.cluster setup.clients client.test setup.site client1.test clean

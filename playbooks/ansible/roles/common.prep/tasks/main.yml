@@ -15,3 +15,8 @@
   template:
     src: hosts.j2
     dest: /etc/hosts
+
+- name: Set hostname
+  when: config.domain is defined
+  hostname:
+    name: "{{ inventory_hostname }}.{{ config.domain }}"

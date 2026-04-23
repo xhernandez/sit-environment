@@ -418,7 +418,9 @@ environments:
       setup:
         cpu_weight: 2
         memory_weight: 2
-        kernel: 5.14.0-570
+        kernel:
+          centos9: 5.14.0-611
+          centos10: 6.12.0-124
         networks:
           private: 200
           public: 200
@@ -439,7 +441,9 @@ environments:
         cpu_weight: 2
         memory_weight: 2
         instances: 2
-        kernel: 5.14.0-570
+        kernel:
+          centos9: 5.14.0-611
+          centos10: 6.12.0-124
         disks: [10]
         networks:
           private: 50
@@ -448,3 +452,10 @@ environments:
           public: 10
         groups: [cluster, nsd, quorum, manager]
         accounts: [default]
+
+      ad:
+        cpu_weight: 0
+        memory_weight: 0
+        networks:
+          public: 100
+        groups: [ad]

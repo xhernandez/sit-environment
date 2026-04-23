@@ -1,3 +1,6 @@
+{% for node in config.groups['ad'] | default([]) -%}
+{{ config.nodes[node].networks.public }} {{ node }}.{{ config.domain }} {{ node }}
+{% endfor -%}
 {% for node in config.groups['cluster'] -%}
 {{ config.nodes[node].networks.private }} {% if config.domain is defined %}{{ node }}.{{ config.domain }} {% endif %}{{ node }}
 {% if 'public' in config.nodes[node].networks -%}

@@ -10,3 +10,5 @@
       - python3-libsemanage
       - python3-pexpect
       - policycoreutils-python-utils
+      - bind-utils
+      - krb5-workstation
