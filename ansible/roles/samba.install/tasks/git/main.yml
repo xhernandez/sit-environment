@@ -15,10 +15,10 @@
 
 - name: Setup git repository
   git:
-    repo: "{{ config.install.samba.git.repo }}"
-    dest: "{{ config.install.samba.git.dest }}"
-    version: "{{ config.install.samba.git.version }}"
-    refspec: "{{ config.install.samba.git.refspec }}"
+    repo: "{{ site.samba.url }}"
+    dest: "{{ site.samba.dest }}"
+    version: "{{ site.samba.version }}"
+    refspec: "{{ site.samba.refspec }}"
 
 - name: Configure samba installation(backend specific)
   include_role:
@@ -28,7 +28,7 @@
 - name: Install samba and ctdb
   command: make -j install
   args:
-    chdir: "{{ config.install.samba.git.dest }}"
+    chdir: "{{ site.samba.dest }}"
 
 - name: Prepare the installation
   shell: |
