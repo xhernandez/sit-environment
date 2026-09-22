@@ -588,8 +588,8 @@ environments:
       methods: ['kclient', 'vfs', 'vfs-new', 'vfs-proxy']
 
     nodes:
-      storage:
-        instances: 3
+      storage-a:
+        instances: 2
         cpu_weight: 2
         memory_weight: 2
         system_disk: 20
@@ -602,6 +602,22 @@ environments:
         ad: member
         groups: [cluster]
         accounts: [default]
+
+      storage-b:
+        cpu_weight: 2
+        memory_weight: 2
+        system_disk: 20
+        disks: [10, 10, 10]
+        networks:
+          private: 110
+          public: 110
+        ctdb:
+          public: 20
+        ad: member
+        groups: [cluster]
+        accounts: [default]
+        install:
+          samba: latest
 
       client:
         cpu_weight: 1
@@ -664,10 +680,9 @@ environments:
         ad: member
         groups: [clients]
 
-      storage:
+      storage-a:
         cpu_weight: 2
         memory_weight: 2
-        instances: 2
         kernel: 6.12.0-211
         disks: [10]
         networks:
@@ -678,6 +693,22 @@ environments:
         ad: member
         groups: [cluster, nsd, quorum, manager]
         accounts: [default]
+
+      storage-b:
+        cpu_weight: 2
+        memory_weight: 2
+        kernel: 6.12.0-211
+        disks: [10]
+        networks:
+          private: 60
+          public: 60
+        ctdb:
+          public: 30
+        ad: member
+        groups: [cluster, nsd, quorum, manager]
+        accounts: [default]
+        install:
+          samba: latest
 
       ad:
         cpu_weight: 0
