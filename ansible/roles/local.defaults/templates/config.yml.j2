@@ -180,6 +180,11 @@ config:
     {%- endif +%}
   {%- endfor +%}
 
+  settings:
+  {%- for name in settings.settings +%}
+    {{ name }}: &settings_{{ name }} {{ settings.settings[name] }}
+  {%- endfor +%}
+
 {%- set max_memory = max_memory | int +%}
 {%- set max_cpu = max_cpu | int +%}
 {%- set total_mem = max_memory * ((memory | default(settings.resources.memory | default(50))) | int) / 100 +%}
@@ -244,6 +249,7 @@ config:
         {%- endfor +%}
       accounts: {{ data.accounts | default([]) }}
       samba: *{{ 'samba_' + (data.samba | default(settings.install.samba.keys() | first)) }}
+      settings: *{{ 'settings_' + (data.settings | default(settings.settings.keys() | first )) }}
       {%- endfor +%}
     {%- endif +%}
   {%- endfor +%}
